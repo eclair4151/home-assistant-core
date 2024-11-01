@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from homeassistant.const import Platform
 
+from .nut_command import NutCommand, NutParameter
+
 DOMAIN = "nut"
 
 PLATFORMS = [Platform.SENSOR]
@@ -37,32 +39,38 @@ STATE_TYPES = {
     "TEST": "Battery Testing",
 }
 
-COMMAND_BEEPER_DISABLE = "beeper.disable"
-COMMAND_BEEPER_ENABLE = "beeper.enable"
-COMMAND_BEEPER_MUTE = "beeper.mute"
-COMMAND_BEEPER_TOGGLE = "beeper.toggle"
-COMMAND_BYPASS_START = "bypass.start"
-COMMAND_BYPASS_STOP = "bypass.stop"
-COMMAND_CALIBRATE_START = "calibrate.start"
-COMMAND_CALIBRATE_STOP = "calibrate.stop"
-COMMAND_LOAD_OFF = "load.off"
-COMMAND_LOAD_ON = "load.on"
-COMMAND_RESET_INPUT_MINMAX = "reset.input.minmax"
-COMMAND_RESET_WATCHDOG = "reset.watchdog"
-COMMAND_SHUTDOWN_REBOOT = "shutdown.reboot"
-COMMAND_SHUTDOWN_REBOOT_GRACEFUL = "shutdown.reboot.graceful"
-COMMAND_SHUTDOWN_RETURN = "shutdown.return"
-COMMAND_SHUTDOWN_STAYOFF = "shutdown.stayoff"
-COMMAND_SHUTDOWN_STOP = "shutdown.stop"
-COMMAND_TEST_BATTERY_START = "test.battery.start"
-COMMAND_TEST_BATTERY_START_DEEP = "test.battery.start.deep"
-COMMAND_TEST_BATTERY_START_QUICK = "test.battery.start.quick"
-COMMAND_TEST_BATTERY_STOP = "test.battery.stop"
-COMMAND_TEST_FAILURE_START = "test.failure.start"
-COMMAND_TEST_FAILURE_STOP = "test.failure.stop"
-COMMAND_TEST_PANEL_START = "test.panel.start"
-COMMAND_TEST_PANEL_STOP = "test.panel.stop"
-COMMAND_TEST_SYSTEM_START = "test.system.start"
+COMMAND_BEEPER_DISABLE = NutCommand("beeper.disable")
+COMMAND_BEEPER_ENABLE = NutCommand("beeper.enable")
+COMMAND_BEEPER_MUTE = NutCommand("beeper.mute")
+COMMAND_BEEPER_TOGGLE = NutCommand("beeper.toggle")
+COMMAND_BYPASS_START = NutCommand("bypass.start")
+COMMAND_BYPASS_STOP = NutCommand("bypass.stop")
+COMMAND_CALIBRATE_START = NutCommand("calibrate.start")
+COMMAND_CALIBRATE_STOP = NutCommand("calibrate.stop")
+COMMAND_LOAD_OFF = NutCommand("load.off")
+COMMAND_LOAD_OFF_DELAY = NutCommand(
+    "load.off.delay", parameter=NutParameter("delay", int)
+)
+COMMAND_LOAD_ON = NutCommand("load.on")
+COMMAND_LOAD_ON_DELAY = NutCommand(
+    "load.on.delay", parameter=NutParameter("delay", int)
+)
+COMMAND_RESET_INPUT_MINMAX = NutCommand("reset.input.minmax")
+COMMAND_RESET_WATCHDOG = NutCommand("reset.watchdog")
+COMMAND_SHUTDOWN_REBOOT = NutCommand("shutdown.reboot")
+COMMAND_SHUTDOWN_REBOOT_GRACEFUL = NutCommand("shutdown.reboot.graceful")
+COMMAND_SHUTDOWN_RETURN = NutCommand("shutdown.return")
+COMMAND_SHUTDOWN_STAYOFF = NutCommand("shutdown.stayoff")
+COMMAND_SHUTDOWN_STOP = NutCommand("shutdown.stop")
+COMMAND_TEST_BATTERY_START = NutCommand("test.battery.start")
+COMMAND_TEST_BATTERY_START_DEEP = NutCommand("test.battery.start.deep")
+COMMAND_TEST_BATTERY_START_QUICK = NutCommand("test.battery.start.quick")
+COMMAND_TEST_BATTERY_STOP = NutCommand("test.battery.stop")
+COMMAND_TEST_FAILURE_START = NutCommand("test.failure.start")
+COMMAND_TEST_FAILURE_STOP = NutCommand("test.failure.stop")
+COMMAND_TEST_PANEL_START = NutCommand("test.panel.start")
+COMMAND_TEST_PANEL_STOP = NutCommand("test.panel.stop")
+COMMAND_TEST_SYSTEM_START = NutCommand("test.system.start")
 
 INTEGRATION_SUPPORTED_COMMANDS = {
     COMMAND_BEEPER_DISABLE,
@@ -74,7 +82,9 @@ INTEGRATION_SUPPORTED_COMMANDS = {
     COMMAND_CALIBRATE_START,
     COMMAND_CALIBRATE_STOP,
     COMMAND_LOAD_OFF,
+    COMMAND_LOAD_OFF_DELAY,
     COMMAND_LOAD_ON,
+    COMMAND_LOAD_ON_DELAY,
     COMMAND_RESET_INPUT_MINMAX,
     COMMAND_RESET_WATCHDOG,
     COMMAND_SHUTDOWN_REBOOT,
@@ -91,4 +101,9 @@ INTEGRATION_SUPPORTED_COMMANDS = {
     COMMAND_TEST_PANEL_START,
     COMMAND_TEST_PANEL_STOP,
     COMMAND_TEST_SYSTEM_START,
+}
+
+
+INTEGRATION_SUPPORTED_COMMANDS_DICT = {
+    cmd.command: cmd for cmd in INTEGRATION_SUPPORTED_COMMANDS
 }

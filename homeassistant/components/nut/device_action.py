@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import voluptuous as vol
 
-from homeassistant.components.device_automation import InvalidDeviceAutomationConfig
+from homeassistant.components.device_automation import (
+    InvalidDeviceAutomationConfig,
+    async_validate_entity_schema,
+)
 from homeassistant.const import CONF_DEVICE_ID, CONF_DOMAIN, CONF_TYPE
 from homeassistant.core import Context, HomeAssistant
 from homeassistant.helpers import device_registry as dr
@@ -12,15 +15,35 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType, TemplateVarsType
 
 from . import NutRuntimeData
-from .const import DOMAIN, INTEGRATION_SUPPORTED_COMMANDS
-
-ACTION_TYPES = {cmd.replace(".", "_") for cmd in INTEGRATION_SUPPORTED_COMMANDS}
-
-ACTION_SCHEMA = cv.DEVICE_ACTION_BASE_SCHEMA.extend(
-    {
-        vol.Required(CONF_TYPE): vol.In(ACTION_TYPES),
-    }
+from .const import (
+    DOMAIN,
+    INTEGRATION_SUPPORTED_COMMANDS,
+    INTEGRATION_SUPPORTED_COMMANDS_DICT,
 )
+
+ACTION_TYPES = {cmd.command.replace(".", "_") for cmd in INTEGRATION_SUPPORTED_COMMANDS}
+
+
+async def async_validate_action_config(
+    hass: HomeAssistant, config: ConfigType
+) -> ConfigType:
+    """Validate the device action configuration."""
+
+    schema = cv.DEVICE_ACTION_BASE_SCHEMA.extend(
+        {
+            vol.Required(CONF_TYPE): vol.In(ACTION_TYPES),
+        }
+    )
+
+    # Check if this command support a param, and if so, add the param to the schema
+    device_action_name = config[CONF_TYPE]
+    command_name = _get_command_name(device_action_name)
+    if (device_action := INTEGRATION_SUPPORTED_COMMANDS_DICT.get(command_name)) and (
+        param := device_action.parameter
+    ):
+        schema = schema.extend({vol.Optional(param.name): param.type})
+
+    return async_validate_entity_schema(hass, config, schema)
 
 
 async def async_get_actions(
@@ -54,7 +77,16 @@ async def async_call_action_from_config(
         raise InvalidDeviceAutomationConfig(
             f"Unable to find a NUT device with id {device_id}"
         )
-    await runtime_data.data.async_run_command(command_name)
+
+    param_value = None
+    if (
+        (device_action := INTEGRATION_SUPPORTED_COMMANDS_DICT.get(command_name))
+        and (param := device_action.parameter)
+        and (param_val := config.get(param.name))
+    ):
+        param_value = str(param_val)
+
+    await runtime_data.data.async_run_command(command_name, param_value)
 
 
 def _get_device_action_name(command_name: str) -> str:

@@ -29,7 +29,7 @@ async def test_get_all_actions_for_specified_user(
 ) -> None:
     """Test we get all the expected actions from a nut if user is specified."""
     list_commands_return_value = {
-        supported_command: supported_command
+        supported_command: supported_command.command
         for supported_command in INTEGRATION_SUPPORTED_COMMANDS
     }
 
@@ -44,7 +44,7 @@ async def test_get_all_actions_for_specified_user(
     expected_actions = [
         {
             "domain": DOMAIN,
-            "type": action.replace(".", "_"),
+            "type": action.command.replace(".", "_"),
             "device_id": device_entry.id,
             "metadata": {},
         }

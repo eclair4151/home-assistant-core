@@ -28,7 +28,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    INTEGRATION_SUPPORTED_COMMANDS,
+    INTEGRATION_SUPPORTED_COMMANDS_DICT,
     PLATFORMS,
 )
 
@@ -113,7 +113,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: NutConfigEntry) -> bool:
         user_available_commands = {
             device_supported_command
             for device_supported_command in await data.async_list_commands() or {}
-            if device_supported_command in INTEGRATION_SUPPORTED_COMMANDS
+            if device_supported_command in INTEGRATION_SUPPORTED_COMMANDS_DICT
         }
     else:
         user_available_commands = set()
@@ -284,13 +284,15 @@ class PyNUTData:
             self._device_info = self._get_device_info()
         return self._status
 
-    async def async_run_command(self, command_name: str) -> None:
+    async def async_run_command(
+        self, command_name: str, param: str | None = None
+    ) -> None:
         """Invoke instant command in UPS."""
         if TYPE_CHECKING:
             assert self._alias is not None
 
         try:
-            await self._client.run_command(self._alias, command_name)
+            await self._client.run_command(self._alias, command_name, param)
         except NUTError as err:
             raise HomeAssistantError(
                 f"Error running command {command_name}, {err}"
