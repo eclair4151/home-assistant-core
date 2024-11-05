@@ -20,6 +20,7 @@ from .const import (
     INTEGRATION_SUPPORTED_COMMANDS,
     INTEGRATION_SUPPORTED_COMMANDS_DICT,
 )
+from .nut_command import NutParameter
 
 ACTION_TYPES = {cmd.command.replace(".", "_") for cmd in INTEGRATION_SUPPORTED_COMMANDS}
 
@@ -28,19 +29,16 @@ async def async_validate_action_config(
     hass: HomeAssistant, config: ConfigType
 ) -> ConfigType:
     """Validate the device action configuration."""
-
     schema = cv.DEVICE_ACTION_BASE_SCHEMA.extend(
         {
             vol.Required(CONF_TYPE): vol.In(ACTION_TYPES),
         }
     )
 
-    # Check if this command support a param, and if so, add the param to the schema
+    # Check if this command support a param, and if so, add the optional param to the schema
     device_action_name = config[CONF_TYPE]
-    command_name = _get_command_name(device_action_name)
-    if (device_action := INTEGRATION_SUPPORTED_COMMANDS_DICT.get(command_name)) and (
-        param := device_action.parameter
-    ):
+    param = get_parameter_for_command(device_action_name)
+    if param is not None:
         schema = schema.extend({vol.Optional(param.name): param.type})
 
     return async_validate_entity_schema(hass, config, schema)
@@ -72,20 +70,16 @@ async def async_call_action_from_config(
     device_action_name: str = config[CONF_TYPE]
     command_name = _get_command_name(device_action_name)
     device_id: str = config[CONF_DEVICE_ID]
+    param_value = None
     runtime_data = _get_runtime_data_from_device_id(hass, device_id)
     if not runtime_data:
         raise InvalidDeviceAutomationConfig(
             f"Unable to find a NUT device with id {device_id}"
         )
 
-    param_value = None
-    if (
-        (device_action := INTEGRATION_SUPPORTED_COMMANDS_DICT.get(command_name))
-        and (param := device_action.parameter)
-        and (param_val := config.get(param.name))
-    ):
+    param = get_parameter_for_command(device_action_name)
+    if param and (param_val := config.get(param.name)):
         param_value = str(param_val)
-
     await runtime_data.data.async_run_command(command_name, param_value)
 
 
@@ -108,3 +102,24 @@ def _get_runtime_data_from_device_id(
     )
     assert entry and isinstance(entry.runtime_data, NutRuntimeData)
     return entry.runtime_data
+
+
+async def async_get_action_capabilities(
+    hass: HomeAssistant, config: ConfigType
+) -> dict[str, vol.Schema]:
+    """Get the capabilities of a device action."""
+    device_action_name = config[CONF_TYPE]
+    if param := get_parameter_for_command(device_action_name):
+        return {"extra_fields": vol.Schema({vol.Optional(param.name): param.type})}
+
+    return {}
+
+
+def get_parameter_for_command(device_action_name: str) -> NutParameter | None:
+    """Get the parameter object for a command if one exists, otherwise return None."""
+    command_name = _get_command_name(device_action_name)
+    if (device_action := INTEGRATION_SUPPORTED_COMMANDS_DICT.get(command_name)) and (
+        param := device_action.parameter
+    ):
+        return param
+    return None

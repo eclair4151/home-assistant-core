@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from homeassistant.const import Platform
+import homeassistant.helpers.config_validation as cv
 
 from .nut_command import NutCommand, NutParameter
 
@@ -49,11 +50,11 @@ COMMAND_CALIBRATE_START = NutCommand("calibrate.start")
 COMMAND_CALIBRATE_STOP = NutCommand("calibrate.stop")
 COMMAND_LOAD_OFF = NutCommand("load.off")
 COMMAND_LOAD_OFF_DELAY = NutCommand(
-    "load.off.delay", parameter=NutParameter("delay", int)
+    "load.off.delay", parameter=NutParameter("Delay", cv.positive_time_period_dict)
 )
 COMMAND_LOAD_ON = NutCommand("load.on")
 COMMAND_LOAD_ON_DELAY = NutCommand(
-    "load.on.delay", parameter=NutParameter("delay", int)
+    "load.on.delay", parameter=NutParameter("Delay", cv.positive_time_period_dict)
 )
 COMMAND_RESET_INPUT_MINMAX = NutCommand("reset.input.minmax")
 COMMAND_RESET_WATCHDOG = NutCommand("reset.watchdog")
@@ -72,7 +73,7 @@ COMMAND_TEST_PANEL_START = NutCommand("test.panel.start")
 COMMAND_TEST_PANEL_STOP = NutCommand("test.panel.stop")
 COMMAND_TEST_SYSTEM_START = NutCommand("test.system.start")
 
-INTEGRATION_SUPPORTED_COMMANDS = {
+INTEGRATION_SUPPORTED_COMMANDS = [
     COMMAND_BEEPER_DISABLE,
     COMMAND_BEEPER_ENABLE,
     COMMAND_BEEPER_MUTE,
@@ -101,7 +102,7 @@ INTEGRATION_SUPPORTED_COMMANDS = {
     COMMAND_TEST_PANEL_START,
     COMMAND_TEST_PANEL_STOP,
     COMMAND_TEST_SYSTEM_START,
-}
+]
 
 
 INTEGRATION_SUPPORTED_COMMANDS_DICT = {

@@ -2,13 +2,15 @@
 
 from dataclasses import dataclass
 
+import voluptuous as vol
+
 
 @dataclass
 class NutParameter:
-    """Class for representing NUT command parameters."""
+    """Class for representing NUT command parameters with a name and type."""
 
     name: str
-    type: type  # int, str, or None
+    type: vol.All | vol.Any
 
 
 @dataclass
