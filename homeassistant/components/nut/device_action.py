@@ -39,7 +39,7 @@ async def async_validate_action_config(
     device_action_name = config[CONF_TYPE]
     param = get_parameter_for_command(device_action_name)
     if param is not None:
-        schema = schema.extend({vol.Optional(param.name): param.type})
+        schema = schema.extend({vol.Optional(param.name): param.schema})
 
     return async_validate_entity_schema(hass, config, schema)
 
@@ -79,7 +79,9 @@ async def async_call_action_from_config(
 
     param = get_parameter_for_command(device_action_name)
     if param and (param_val := config.get(param.name)):
-        param_value = str(param_val)
+        # param_value = str(param_val)
+        param_value = param.string_callback(param_val)
+    # print(param_value)
     await runtime_data.data.async_run_command(command_name, param_value)
 
 
@@ -110,7 +112,7 @@ async def async_get_action_capabilities(
     """Get the capabilities of a device action."""
     device_action_name = config[CONF_TYPE]
     if param := get_parameter_for_command(device_action_name):
-        return {"extra_fields": vol.Schema({vol.Optional(param.name): param.type})}
+        return {"extra_fields": vol.Schema({vol.Optional(param.name): param.schema})}
 
     return {}
 

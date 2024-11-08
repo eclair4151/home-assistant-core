@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+
+import voluptuous as vol
+
 from homeassistant.const import Platform
 import homeassistant.helpers.config_validation as cv
 
@@ -40,6 +44,12 @@ STATE_TYPES = {
     "TEST": "Battery Testing",
 }
 
+
+def timedelta_to_string(delta: timedelta) -> str:
+    """Convert a timedelta object to a string representing the number of seconds."""
+    return str(int(delta.total_seconds()))
+
+
 COMMAND_BEEPER_DISABLE = NutCommand("beeper.disable")
 COMMAND_BEEPER_ENABLE = NutCommand("beeper.enable")
 COMMAND_BEEPER_MUTE = NutCommand("beeper.mute")
@@ -50,11 +60,21 @@ COMMAND_CALIBRATE_START = NutCommand("calibrate.start")
 COMMAND_CALIBRATE_STOP = NutCommand("calibrate.stop")
 COMMAND_LOAD_OFF = NutCommand("load.off")
 COMMAND_LOAD_OFF_DELAY = NutCommand(
-    "load.off.delay", parameter=NutParameter("Delay", cv.positive_time_period_dict)
+    "load.off.delay",
+    parameter=NutParameter(
+        "Delay",
+        vol.Schema(cv.positive_time_period_dict),
+        string_callback=timedelta_to_string,
+    ),
 )
 COMMAND_LOAD_ON = NutCommand("load.on")
 COMMAND_LOAD_ON_DELAY = NutCommand(
-    "load.on.delay", parameter=NutParameter("Delay", cv.positive_time_period_dict)
+    "load.on.delay",
+    parameter=NutParameter(
+        "Delay",
+        vol.Schema(cv.positive_time_period_dict),
+        string_callback=timedelta_to_string,
+    ),
 )
 COMMAND_RESET_INPUT_MINMAX = NutCommand("reset.input.minmax")
 COMMAND_RESET_WATCHDOG = NutCommand("reset.watchdog")

@@ -1,16 +1,19 @@
 """Defines the NutCommand class for representing NUT commands and their parameters."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import voluptuous as vol
 
 
 @dataclass
 class NutParameter:
-    """Class for representing NUT command parameters with a name and type."""
+    """Class for representing NUT command parameters with a name and schema, as well as a method for converting the param into a string."""
 
     name: str
-    type: vol.All | vol.Any
+    schema: vol.Schema
+    string_callback: Callable[[Any], str]
 
 
 @dataclass
