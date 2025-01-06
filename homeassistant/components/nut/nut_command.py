@@ -13,7 +13,7 @@ class NutParameter:
 
     name: str
     schema: vol.Schema
-    string_callback: Callable[[Any], str]
+    string_formatting_callback: Callable[[Any], str]
 
 
 @dataclass

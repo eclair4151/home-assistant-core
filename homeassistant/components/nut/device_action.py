@@ -79,9 +79,8 @@ async def async_call_action_from_config(
 
     param = get_parameter_for_command(device_action_name)
     if param and (param_val := config.get(param.name)):
-        # param_value = str(param_val)
-        param_value = param.string_callback(param_val)
-    # print(param_value)
+        param_value = param.string_formatting_callback(param_val)
+
     await runtime_data.data.async_run_command(command_name, param_value)
 
 
